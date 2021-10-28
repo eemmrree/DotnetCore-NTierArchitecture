@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Tracing;
 using Business.Concrete;
 using DataAccess.Concrete.EntityFramework;
 
@@ -33,30 +34,43 @@ namespace ConsoleUI
         {
             var productManager = new ProductManager(new EfProductDal());
 
-            foreach (var item in productManager.GetAll())
+            foreach (var item in productManager.GetAll().Data)
             {
                 Console.WriteLine(item.ProductName + " -> " + item.UnitPrice);
             }
 
             Console.WriteLine("------------------Category----------------");
 
-            foreach (var item in productManager.GetAllByCategoryId(7))
+            foreach (var item in productManager.GetAllByCategoryId(7).Data)
             {
                 Console.WriteLine(item.CategoryId + " - " + item.ProductName + " -> " + item.UnitPrice);
             }
 
             Console.WriteLine("----------------Unit Price-----------------");
 
-            foreach (var item in productManager.GetByUnitPrice(10, 2000))
+            foreach (var item in productManager.GetByUnitPrice(10, 2000).Data)
             {
                 Console.WriteLine(item.ProductName + " -> " + item.UnitPrice);
             }
 
+
+
             Console.WriteLine("----------------ProductDetails-----------------");
-            foreach (var item in productManager.GetProductDetails())
+            var results = productManager.GetProductDetails();
+            if (results.Success==true)
             {
-                Console.WriteLine(item.ProductName + " / " + item.CategoryName);
+                foreach (var item in results.Data)
+                {
+                    Console.WriteLine(item.ProductName + " / " + item.CategoryName);
+                }
             }
+            else
+            {
+                Console.WriteLine(results.Message);
+            }
+
+            
+           
         }
     }
 }
