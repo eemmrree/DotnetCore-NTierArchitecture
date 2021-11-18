@@ -9,17 +9,23 @@ using Entities.Concrete;
 using Entities.DTOs;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Core.Aspects.Autofac.Validation;
+using Core.Utilities.Business;
 
 namespace Business.Concrete
 {
     public class ProductManager:IProductService
     {
         readonly IProductDal _productDal;
+        private readonly ICategoryService _categoryService;
 
-        public ProductManager(IProductDal productDal)
+        
+
+        public ProductManager(IProductDal productDal , ICategoryService categoryService)
         {
             _productDal = productDal;
+            _categoryService = categoryService;
         }
 
         public IDataResult<List<Product>> GetAll()
@@ -54,9 +60,51 @@ namespace Business.Concrete
         [ValidationAspect(typeof(ProductValidator))]
         public IResult Add(Product product)
         {
-            ValidationTool.Validate(new ProductValidator(),product);
+            var results = BusinessRules.Run(CheckIfProductCountOfCategoryCorrect(product.CategoryId),
+                CheckIfProductName(product.ProductName), CheckIfCategoryCount());
+
+            if (results!=null)
+            {
+                return results;
+            }
             _productDal.Add(product);
-            return new Result(true,Messages.ProductAdded);
+            return new Result(true, Messages.ProductAdded);
+
+           
         }
+
+        private IResult CheckIfProductCountOfCategoryCorrect(int categoryId)
+        {
+            var results = _productDal.GetAll(p => p.CategoryId == categoryId).Count;
+            if (results >= 10)
+            {
+                return new ErrorResult();
+            }
+
+            return new SuccessResult();
+        }
+
+        private IResult CheckIfProductName(string productName)
+        {
+            var results = _productDal.GetAll(p => p.ProductName == productName).Any();
+            if (results)
+            {
+                return new ErrorResult();
+            }
+
+            return new SuccessResult();
+        }
+
+        private IResult CheckIfCategoryCount()
+        {
+            var results = _categoryService.GetAll().Data.Count;
+            if (results > 10)
+            {
+                return new ErrorResult();
+            }
+
+            return new SuccessResult();
+        }
+
     }
 }
