@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+
+using System;
 
 namespace Core.Utilities.IoC
 {
@@ -11,10 +8,10 @@ namespace Core.Utilities.IoC
     {
         public static IServiceProvider ServiceProvider { get; private set; }
 
-        public static IServiceCollection Create(IServiceCollection service)
+        public static IServiceCollection Create(IServiceCollection services)
         {
-            ServiceProvider = service.BuildServiceProvider();
-            return service;
+            ServiceProvider = services.BuildServiceProvider();
+            return services;
         }
     }
 }
