@@ -10,6 +10,7 @@ using Entities.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Business.BusinessAspect.Autofac;
 using Core.Aspects.Autofac.Validation;
 using Core.Utilities.Business;
 
@@ -57,6 +58,7 @@ namespace Business.Concrete
             return new SuccessDataResult<Product>(_productDal.Get(p => p.ProductId == productId));
         }
 
+        [SecuredOperation("admin")]
         [ValidationAspect(typeof(ProductValidator))]
         public IResult Add(Product product)
         {
